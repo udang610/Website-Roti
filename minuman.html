@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu | Crumb & Crust</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-category="Minuman">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top py-3">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+        <img src="assets/logo.jpg" alt="Logo" onerror="this.src='https://via.placeholder.com/45/E85D04/FFFFFF?text=C'">
+        <span class="fs-4">Crumb & Crust</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto align-items-center w-100 justify-content-center gap-2 mt-3 mt-lg-0">
+           <li class="nav-item w-100" style="max-width: 400px;">
+              <input type="text" class="form-control rounded-pill px-4 search-input-nav" placeholder="🔍 Cari roti, kue, minuman...">
+           </li>
+        </ul>
+        <ul class="navbar-nav ms-auto align-items-center mt-3 mt-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Beranda</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Kategori Menu
+            </a>
+            <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item fw-bold text-primary-custom" href="menu.html">Semua Menu</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="roti.html">Roti</a></li>
+              <li><a class="dropdown-item" href="kue.html">Kue</a></li>
+              <li><a class="dropdown-item" href="makanan.html">Makanan</a></li>
+              <li><a class="dropdown-item" href="minuman.html">Minuman</a></li>
+              <li><a class="dropdown-item" href="cookies.html">Cookies</a></li>
+            </ul>
+          </li>
+          <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+            <a href="cart.html" class="btn btn-sm btn-primary-custom rounded-pill px-3 py-2 d-flex align-items-center gap-2" id="cart-btn-nav">
+              🛒 <span id="cart-count" class="fw-bold">0</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Menu Section -->
+  <section class="py-5">
+    <div class="container">
+      <div class="text-center mb-4">
+        <h2 class="fw-bold display-5">Menu Pilihan Kami</h2>
+        <div style="width: 60px; height: 4px; background: var(--primary-color); margin: 10px auto; border-radius: 2px;"></div>
+      </div>
+
+      <!-- Categories -->
+      <div class="d-flex justify-content-center flex-wrap gap-2 mb-5" id="category-tabs">
+        <a href="menu.html" class="btn btn-outline-custom rounded-pill px-4">Semua</a>
+        <a href="roti.html" class="btn btn-outline-custom rounded-pill px-4">Roti</a>
+        <a href="kue.html" class="btn btn-outline-custom rounded-pill px-4">Kue</a>
+        <a href="makanan.html" class="btn btn-outline-custom rounded-pill px-4">Makanan</a>
+        <a href="minuman.html" class="btn btn-outline-custom rounded-pill px-4 active">Minuman</a>
+        <a href="cookies.html" class="btn btn-outline-custom rounded-pill px-4">Cookies</a>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="row g-4" id="products-container">
+        <!-- Products injected here -->
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Floating Cart for mobile -->
+  <a href="cart.html" class="btn btn-primary-custom cart-floating d-lg-none">
+    🛒 <span id="cart-count-float">0</span>
+  </a>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container text-center text-md-start">
+      <div class="row g-4">
+        <div class="col-md-6">
+          <h3 class="text-primary-custom fw-bold mb-3">Crumb & Crust</h3>
+          <p class="text-white-50">Kualitas premium, setiap hari.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <p class="text-white-50 mb-1">📍 Jl. Pastry Indah No. 12, Jakarta</p>
+          <p class="text-white-50 mb-1">📞 0812-3456-7890</p>
+        </div>
+      </div>
+      <div class="footer-bottom text-center mt-4">
+        <p class="mb-0">&copy; 2026 Crumb & Crust. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/db.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>
