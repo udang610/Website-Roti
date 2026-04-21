@@ -174,22 +174,76 @@ const addToCart = (id) => {
 
 // --- CART PAGE LOGIC ---
 const cartItemsPage = document.getElementById('cart-items-page');
-const showOrderSuccessModal = () => {
+const showOrderSuccessModal = (isAutoConfirmed = false) => {
   const modalId = 'orderSuccessModal';
   let modalEl = document.getElementById(modalId);
 
   if (!modalEl) {
     const modalHtml = `
-      <div class="modal fade" id="${modalId}" tabindex="-1">
+      <div class="modal fade" id="${modalId}" data-bs-backdrop="static" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
             <div class="modal-body p-5 text-center">
               <div class="mb-4">
-                <div class="display-1 text-success mb-3">✅</div>
+                <div class="display-1 text-success mb-3 animate-bounce">✅</div>
                 <h3 class="fw-bold">Pesanan Berhasil!</h3>
-                <p class="text-muted">Terima kasih telah berbelanja di Crumb & Crust. Admin kami akan segera menghubungi Anda melalui WhatsApp.</p>
+                <p class="text-muted" id="success-modal-msg">Terima kasih telah berbelanja di Crumb & Crust. Admin kami akan segera menghubungi Anda melalui WhatsApp.</p>
               </div>
               <button type="button" class="btn btn-primary-custom btn-lg rounded-pill px-5 w-100" data-bs-dismiss="modal">Tutup</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    modalEl = document.getElementById(modalId);
+  }
+
+  if (isAutoConfirmed) {
+    document.getElementById('success-modal-msg').textContent = 'Pembayaran Anda telah kami terima! Pesanan sedang diproses.';
+  }
+
+  const bsModal = new bootstrap.Modal(modalEl);
+  bsModal.show();
+
+  modalEl.addEventListener('hidden.bs.modal', () => {
+    window.location.href = 'index.html';
+  });
+};
+
+const showQRISWaitingModal = (orderId, totalAmount) => {
+  const modalId = 'qrisWaitingModal';
+  let modalEl = document.getElementById(modalId);
+
+  if (!modalEl) {
+    const modalHtml = `
+      <div class="modal fade" id="${modalId}" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="modal-header border-0 p-4 pb-0">
+              <h5 class="modal-title fw-bold">Menunggu Pembayaran</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+              <div class="qris-payment-area p-4 bg-white rounded-4 border-2 border-dashed mb-4">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=CRUMB_CRUST_ORDER_${orderId}_AMT_${totalAmount}" 
+                     alt="QRIS" class="img-fluid mb-3 shadow-sm rounded-3" style="max-width: 220px;">
+                <h4 class="fw-bold text-primary-custom mb-1">${formatRupiah(totalAmount)}</h4>
+                <p class="text-muted small">Silakan scan dan selesaikan pembayaran Anda</p>
+              </div>
+              
+              <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+                <div class="spinner-grow text-primary-custom spinner-grow-sm" role="status"></div>
+                <span class="fw-bold text-muted">Mengecek status pembayaran...</span>
+              </div>
+              
+              <div class="alert alert-light border-0 small text-start">
+                <ul class="mb-0 ps-3">
+                  <li>Scan QRIS di atas dengan aplikasi pembayaran Anda.</li>
+                  <li>Konfirmasi otomatis akan muncul di sini setelah bayar.</li>
+                  <li>Jangan tutup halaman ini sampai konfirmasi muncul.</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -202,8 +256,54 @@ const showOrderSuccessModal = () => {
   const bsModal = new bootstrap.Modal(modalEl);
   bsModal.show();
 
+  // Listen for Realtime Updates
+  const channel = window.db
+    .channel('order-status')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'orders',
+      },
+      (payload) => {
+        console.log('Order update received:', payload);
+        if (payload.new.id == orderId && (payload.new.status === 'confirmed' || payload.new.status === 'paid')) {
+          channel.unsubscribe();
+          bsModal.hide();
+          cart = [];
+          saveCart();
+          showOrderSuccessModal(true);
+        }
+      }
+    )
+    .subscribe((status) => {
+      console.log("Realtime status:", status);
+    });
+
+  // PROTOTYPE ONLY: Auto-confirm after 5 seconds to simulate a successful scan/payment
+  setTimeout(async () => {
+    console.log("Prototype: Simulating payment for order", orderId);
+    
+    // 1. Update the database (for real persistence and testing the listener)
+    const { error } = await window.db
+      .from('orders')
+      .update({ status: 'confirmed' })
+      .eq('id', orderId);
+    
+    if (error) {
+      console.error("Prototype auto-confirm error:", error);
+      // Fallback: If DB update fails, just trigger the UI anyway for the demo
+      channel.unsubscribe();
+      bsModal.hide();
+      cart = [];
+      saveCart();
+      showOrderSuccessModal(true);
+    }
+  }, 5000);
+
   modalEl.addEventListener('hidden.bs.modal', () => {
-    window.location.href = 'index.html';
+    channel.unsubscribe();
   });
 };
 
@@ -211,8 +311,6 @@ if (cartItemsPage) {
   const cartTotalPage = document.getElementById('cart-total-page');
   const checkoutFormPage = document.getElementById('checkout-form-page');
   const paymentMethod = document.getElementById('paymentMethod');
-  const qrisInfo = document.getElementById('qris-info');
-  const bankInfo = document.getElementById('bank-info');
   const promoCodeInput = document.getElementById('promo-code');
   const applyPromoBtn = document.getElementById('apply-promo');
   const promoMessage = document.getElementById('promo-message');
@@ -243,7 +341,7 @@ if (cartItemsPage) {
         </div>
         <div class="d-flex align-items-center gap-4">
           <span class="fw-bold text-primary-custom fs-5">${formatRupiah(subtotal)}</span>
-          <button class="btn btn-sm btn-danger rounded-circle py-1 px-2 remove-item shadow-sm" data-index="${index}" title="Hapus Item">&times;</button>
+          <button class="btn btn-sm btn-danger rounded-circle d-flex align-items-center justify-content-center remove-item shadow-sm" data-index="${index}" title="Hapus Item" style="width: 32px; height: 32px; padding: 0; line-height: 1; font-size: 1.2rem;">&times;</button>
         </div>
       `;
       cartItemsPage.appendChild(div);
@@ -284,28 +382,24 @@ if (cartItemsPage) {
     });
   }
 
-  paymentMethod.addEventListener('change', (e) => {
-    if (e.target.value === 'qris') {
-      qrisInfo.classList.remove('d-none');
-      bankInfo.classList.add('d-none');
-    } else {
-      qrisInfo.classList.add('d-none');
-      bankInfo.classList.remove('d-none');
-    }
-  });
+  if (paymentMethod) {
+    const dokuInfo = document.getElementById('doku-info');
+    const bankInfo = document.getElementById('bank-info');
+    const proofSection = document.getElementById('proof-upload-section');
+    
+    paymentMethod.addEventListener('change', (e) => {
+      const method = e.target.value;
+      
+      dokuInfo.classList.toggle('d-none', method !== 'doku');
+      bankInfo.classList.toggle('d-none', method !== 'transfer');
+      
+      // Toggle proof upload (only for transfer bank)
+      proofSection.classList.toggle('d-none', method !== 'transfer');
+    });
+  }
 
   if (checkoutFormPage) {
-    // Dynamic QRIS update
-    const updateQRIS = () => {
-      const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      const qrisImg = document.getElementById('qris-image');
-      if (qrisImg) {
-        qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PRODUK_CRUMB_CRUST_TOTAL_${totalAmount}`;
-      }
-    };
-
-    renderCartPage(); // Ensure total is calculated
-    updateQRIS();
+    renderCartPage();
 
     checkoutFormPage.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -315,9 +409,11 @@ if (cartItemsPage) {
         return;
       }
 
+      const method = paymentMethod.value;
       const proofFile = document.getElementById('payment-proof').files[0];
-      if (!proofFile) {
-        alert('Silakan upload bukti transfer terlebih dahulu.');
+      
+      if (method === 'transfer' && !proofFile) {
+        alert('Silakan upload bukti transfer terlebih dahulu untuk metode transfer bank.');
         return;
       }
 
@@ -326,8 +422,8 @@ if (cartItemsPage) {
       btnSubmit.textContent = 'Memproses...';
       btnSubmit.disabled = true;
 
-      // Convert file to Base64
       const fileToBase64 = (file) => new Promise((resolve, reject) => {
+        if (!file) resolve(null);
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => resolve(reader.result);
@@ -335,7 +431,7 @@ if (cartItemsPage) {
       });
 
       try {
-        const proofBase64 = await fileToBase64(proofFile);
+        const proofBase64 = proofFile ? await fileToBase64(proofFile) : null;
         const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
         
         const formData = {
@@ -344,23 +440,57 @@ if (cartItemsPage) {
           address: document.getElementById('address').value,
           weight: cart.reduce((sum, item) => sum + item.qty, 0),
           price: totalAmount,
-          // Store payment info inside the items field to avoid DB column errors
           items: {
             cart: cart,
             payment: {
-              method: document.getElementById('paymentMethod').value,
+              method: method,
               proof: proofBase64
             }
           },
           status: 'pending'
         };
 
-        const { error } = await window.db.from('orders').insert([formData]);
+        // 1. Save order to Supabase
+        const { data, error } = await window.db.from('orders').insert([formData]).select();
         if (error) throw error;
+        const orderId = data[0].id;
 
-        cart = [];
-        saveCart();
-        showOrderSuccessModal();
+        // 2. If DOKU, call Edge Function to get payment URL
+        if (method === 'doku') {
+          btnSubmit.textContent = 'Menghubungkan ke DOKU...';
+          
+          // Template for Edge Function Call
+          const { data: edgeData, error: edgeError } = await window.supabase.functions.invoke('doku-payment', {
+            body: { 
+              orderId: orderId,
+              amount: totalAmount,
+              customer: {
+                name: formData.customer_name,
+                phone: formData.phone
+              }
+            }
+          });
+
+          if (edgeError) throw edgeError;
+          
+          if (edgeData && edgeData.paymentUrl) {
+            window.location.href = edgeData.paymentUrl;
+            return;
+          } else {
+            throw new Error('Gagal mendapatkan URL pembayaran dari DOKU');
+          }
+        }
+
+        // 3. Handle based on method
+        if (method === 'qris') {
+          // If QRIS, show the waiting modal and listen for realtime updates
+          showQRISWaitingModal(orderId, totalAmount);
+        } else {
+          // If Manual Transfer or other, clear cart and show success (will be confirmed by admin later)
+          cart = [];
+          saveCart();
+          showOrderSuccessModal();
+        }
       } catch (error) {
         alert('Terjadi kesalahan: ' + (error.message || 'Gagal memproses pesanan'));
         console.error(error);
