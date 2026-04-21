@@ -47,6 +47,27 @@ const formatRupiah = (number) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
 };
 
+// Custom Toast Notification System
+const showToast = (message, type = 'success') => {
+  const toastId = 'custom-toast';
+  let toastEl = document.getElementById(toastId);
+
+  if (!toastEl) {
+    toastEl = document.createElement('div');
+    toastEl.id = toastId;
+    toastEl.className = 'custom-toast shadow-sm';
+    document.body.appendChild(toastEl);
+  }
+
+  toastEl.textContent = message;
+  toastEl.classList.remove('success', 'error', 'info');
+  toastEl.classList.add('show', type);
+
+  setTimeout(() => {
+    toastEl.classList.remove('show');
+  }, 2500);
+};
+
 // Global DOM
 const cartCountElements = [document.getElementById('cart-count'), document.getElementById('cart-count-float'), document.getElementById('cart-btn-nav')].filter(el => el !== null);
 
@@ -284,13 +305,13 @@ const showQRISWaitingModal = (orderId, totalAmount) => {
   // PROTOTYPE ONLY: Auto-confirm after 5 seconds to simulate a successful scan/payment
   setTimeout(async () => {
     console.log("Prototype: Simulating payment for order", orderId);
-    
+
     // 1. Update the database (for real persistence and testing the listener)
     const { error } = await window.db
       .from('orders')
       .update({ status: 'confirmed' })
       .eq('id', orderId);
-    
+
     if (error) {
       console.error("Prototype auto-confirm error:", error);
       // Fallback: If DB update fails, just trigger the UI anyway for the demo
@@ -386,13 +407,13 @@ if (cartItemsPage) {
     const dokuInfo = document.getElementById('doku-info');
     const bankInfo = document.getElementById('bank-info');
     const proofSection = document.getElementById('proof-upload-section');
-    
+
     paymentMethod.addEventListener('change', (e) => {
       const method = e.target.value;
-      
+
       dokuInfo.classList.toggle('d-none', method !== 'doku');
       bankInfo.classList.toggle('d-none', method !== 'transfer');
-      
+
       // Toggle proof upload (only for transfer bank)
       proofSection.classList.toggle('d-none', method !== 'transfer');
     });
@@ -401,19 +422,28 @@ if (cartItemsPage) {
   if (checkoutFormPage) {
     renderCartPage();
 
+    // Check cart before form validation on button click
+    const btnSubmit = checkoutFormPage.querySelector('button[type="submit"]');
+    btnSubmit.addEventListener('click', (e) => {
+      if (cart.length === 0) {
+        e.preventDefault();
+        showToast('Keranjang Kosong!', 'info');
+      }
+    });
+
     checkoutFormPage.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       if (cart.length === 0) {
-        alert('Keranjang masih kosong!');
+        showToast('Keranjang masih kosong!', 'error');
         return;
       }
 
       const method = paymentMethod.value;
       const proofFile = document.getElementById('payment-proof').files[0];
-      
+
       if (method === 'transfer' && !proofFile) {
-        alert('Silakan upload bukti transfer terlebih dahulu untuk metode transfer bank.');
+        showToast('Silakan upload bukti transfer terlebih dahulu.', 'error');
         return;
       }
 
@@ -433,7 +463,7 @@ if (cartItemsPage) {
       try {
         const proofBase64 = proofFile ? await fileToBase64(proofFile) : null;
         const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        
+
         const formData = {
           customer_name: document.getElementById('name').value,
           phone: document.getElementById('whatsapp').value,
@@ -458,10 +488,10 @@ if (cartItemsPage) {
         // 2. If DOKU, call Edge Function to get payment URL
         if (method === 'doku') {
           btnSubmit.textContent = 'Menghubungkan ke DOKU...';
-          
+
           // Template for Edge Function Call
           const { data: edgeData, error: edgeError } = await window.supabase.functions.invoke('doku-payment', {
-            body: { 
+            body: {
               orderId: orderId,
               amount: totalAmount,
               customer: {
@@ -472,7 +502,7 @@ if (cartItemsPage) {
           });
 
           if (edgeError) throw edgeError;
-          
+
           if (edgeData && edgeData.paymentUrl) {
             window.location.href = edgeData.paymentUrl;
             return;
@@ -510,7 +540,7 @@ const orderHistoryList = document.getElementById('order-history-list');
 const fetchOrderHistory = async (phone) => {
   try {
     orderHistoryList.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary-custom" role="status"></div><p class="mt-2">Mencari pesanan...</p></div>';
-    
+
     const { data: orders, error } = await window.db
       .from('orders')
       .select('*')
@@ -528,9 +558,9 @@ const fetchOrderHistory = async (phone) => {
       // Handle both old and new data structure
       const cartItems = Array.isArray(order.items) ? order.items : (order.items?.cart || []);
       const itemsHtml = cartItems.map(i => `${i.qty}x ${i.name}`).join(', ');
-      
-      const statusBadge = order.status === 'pending' 
-        ? '<span class="badge bg-warning text-dark rounded-pill">Menunggu Konfirmasi</span>' 
+
+      const statusBadge = order.status === 'pending'
+        ? '<span class="badge bg-warning text-dark rounded-pill">Menunggu Konfirmasi</span>'
         : '<span class="badge bg-success rounded-pill">Pesanan Dikonfirmasi</span>';
 
       return `
@@ -538,7 +568,14 @@ const fetchOrderHistory = async (phone) => {
           <div class="d-flex justify-content-between align-items-start mb-2">
             <div>
               <h6 class="fw-bold mb-1">Order #${order.id.toString().slice(-4)}</h6>
-              <small class="text-muted">${new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</small>
+              <small class="text-muted">${(() => {
+                let dateStr = order.created_at;
+                if (dateStr && !dateStr.includes('Z') && !dateStr.includes('+')) {
+                  dateStr = dateStr.replace(' ', 'T') + 'Z';
+                }
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+              })()}</small>
             </div>
             ${statusBadge}
           </div>
@@ -572,7 +609,7 @@ if (btnTrackOrder) {
     if (phone) {
       fetchOrderHistory(phone);
     } else {
-      alert('Masukkan nomor WhatsApp terlebih dahulu');
+      showToast('Masukkan nomor WhatsApp terlebih dahulu', 'error');
     }
   });
 }

@@ -9,10 +9,20 @@ const formatRupiah = (number) => {
 };
 
 const formatDate = (isoString) => {
-  const date = new Date(isoString);
+  // Force treat as UTC if no timezone info, then convert to local
+  let dateStr = isoString;
+  if (dateStr && !dateStr.includes('Z') && !dateStr.includes('+')) {
+    dateStr = dateStr.replace(' ', 'T') + 'Z';
+  }
+  const date = new Date(dateStr);
   return date.toLocaleDateString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }) + ' pukul ' + date.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
   });
 };
 
