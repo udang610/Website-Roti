@@ -12,14 +12,9 @@ const formatRupiah = (number) => {
 
 const formatDate = (isoString) => {
   if (!isoString) return '-';
-  // Force treat as UTC if no timezone info, then convert to local
-  let dateStr = isoString;
-  if (dateStr && !dateStr.includes('Z') && !dateStr.includes('+')) {
-    dateStr = dateStr.replace(' ', 'T') + 'Z';
-  }
-  const date = new Date(dateStr);
+  const date = new Date(isoString.replace(' ', 'T'));
   if (isNaN(date.getTime())) return '-';
-  
+
   return date.toLocaleDateString('id-ID', {
     day: 'numeric',
     month: 'long',
@@ -109,13 +104,13 @@ const showOrderDetails = (id) => {
 const renderMonthlySales = (orders) => {
   if (!orders || orders.length === 0) return;
   const salesMap = {};
-  
+
   orders.forEach(o => {
     if (!o.created_at) return;
     const d = new Date(o.created_at);
     // Ignore dates before 2020 (handles null/1970 cases)
     if (d.getFullYear() < 2020) return;
-    
+
     const key = d.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
     if (!salesMap[key]) {
       salesMap[key] = { count: 0, revenue: 0, date: d };
@@ -182,13 +177,13 @@ const renderMonthlySales = (orders) => {
 
 const renderOrdersTable = () => {
   if (!ordersTableBody) return;
-  
+
   const start = (currentPage - 1) * pageSize;
   const end = start + pageSize;
   const pageOrders = allOrders.slice(start, end);
 
   ordersTableBody.innerHTML = '';
-  
+
   if (pageOrders.length === 0) {
     ordersTableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Tidak ada pesanan.</td></tr>';
   } else {
@@ -253,13 +248,13 @@ const fetchOrders = async () => {
 
     if (error) throw error;
     allOrders = orders || [];
-    
+
     let totalRevenue = 0;
     allOrders.forEach(o => totalRevenue += (o.price || 0));
-    
+
     if (totalOrdersEl) totalOrdersEl.textContent = allOrders.length;
     if (totalRevenueEl) totalRevenueEl.textContent = formatRupiah(totalRevenue);
-    
+
     renderMonthlySales(allOrders);
     renderOrdersTable();
   } catch (err) {
@@ -277,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
   paginationTotalEl = document.getElementById('pagination-total');
   btnPrev = document.getElementById('prev-page');
   btnNext = document.getElementById('next-page');
-  
+
   const modalEl = document.getElementById('orderDetailModal');
   if (modalEl) detailModal = new bootstrap.Modal(modalEl);
 
