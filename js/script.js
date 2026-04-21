@@ -477,7 +477,8 @@ if (cartItemsPage) {
               proof: proofBase64
             }
           },
-          status: 'pending'
+          status: 'pending',
+          created_at: new Date().toISOString()
         };
 
         // 1. Save order to Supabase
@@ -569,13 +570,13 @@ const fetchOrderHistory = async (phone) => {
             <div>
               <h6 class="fw-bold mb-1">Order #${order.id.toString().slice(-4)}</h6>
               <small class="text-muted">${(() => {
-                let dateStr = order.created_at;
-                if (dateStr && !dateStr.includes('Z') && !dateStr.includes('+')) {
-                  dateStr = dateStr.replace(' ', 'T') + 'Z';
-                }
-                const d = new Date(dateStr);
-                return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
-              })()}</small>
+          let dateStr = order.created_at;
+          if (dateStr && !dateStr.includes('Z') && !dateStr.includes('+')) {
+            dateStr = dateStr.replace(' ', 'T') + 'Z';
+          }
+          const d = new Date(dateStr);
+          return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+        })()}</small>
             </div>
             ${statusBadge}
           </div>

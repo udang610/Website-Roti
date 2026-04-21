@@ -201,10 +201,13 @@ h6 {
   color: #888;
 }
 
-/* Admin Sidebar */
+
+/* Admin Sidebar Responsive */
 .admin-sidebar {
   min-height: 100vh;
   background: var(--secondary-color);
+  transition: transform 0.3s ease;
+  z-index: 1040;
 }
 
 .admin-sidebar a {
@@ -216,6 +219,20 @@ h6 {
 .admin-sidebar a.active {
   color: white;
   background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 991.98px) {
+  .admin-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+  }
+
+  .admin-sidebar.show {
+    transform: translateX(0);
+  }
 }
 
 .qris-mockup {

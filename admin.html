@@ -14,9 +14,19 @@
 <body>
 
   <div class="d-flex">
+    <!-- Sidebar Toggle (Mobile Only) -->
+    <button class="btn btn-primary-custom d-lg-none position-fixed bottom-0 start-0 m-3 rounded-circle shadow-lg z-3" 
+            onclick="document.querySelector('.admin-sidebar').classList.toggle('show')" 
+            style="width: 50px; height: 50px;">
+      ☰
+    </button>
+
     <!-- Sidebar -->
     <div class="admin-sidebar p-4 d-flex flex-column" style="width: 280px;">
-      <h3 class="text-primary-custom fw-bold mb-4">Crumb & Crust</h3>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-primary-custom fw-bold mb-0">Crumb & Crust</h3>
+        <button class="btn-close d-lg-none" onclick="document.querySelector('.admin-sidebar').classList.remove('show')"></button>
+      </div>
       <ul class="nav nav-pills flex-column mb-auto gap-2">
         <li class="nav-item">
           <a href="#" class="nav-link active bg-white text-dark fw-bold shadow-sm">
@@ -27,9 +37,9 @@
     </div>
 
     <!-- Main Content -->
-    <div class="flex-grow-1 bg-light p-5" style="min-height: 100vh;">
+    <div class="flex-grow-1 bg-light p-3 p-md-5" style="min-height: 100vh; overflow-x: hidden;">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark">Daftar Pesanan Masuk</h2>
+        <h2 class="fw-bold text-dark fs-4 fs-md-2">Daftar Pesanan Masuk</h2>
       </div>
 
       <!-- Stats -->
@@ -98,6 +108,16 @@
               </tr>
             </tbody>
           </table>
+        </div>
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 border-top d-flex justify-content-between align-items-center">
+          <div class="text-muted small">
+            Menampilkan <span id="pagination-info">0 - 0</span> dari <span id="pagination-total">0</span> pesanan
+          </div>
+          <div class="btn-group shadow-sm">
+            <button class="btn btn-sm btn-outline-secondary" id="prev-page">Sebelumnya</button>
+            <button class="btn btn-sm btn-outline-secondary" id="next-page">Berikutnya</button>
+          </div>
         </div>
       </div>
 
