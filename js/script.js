@@ -91,17 +91,28 @@ if (productsContainer || document.querySelector('.search-input-nav')) {
 
   if (searchInputs.length > 0) {
     searchInputs.forEach(input => {
-      input.addEventListener('input', (e) => {
-        currentSearch = e.target.value;
+      const parent = input.closest('.input-group') || input.parentElement;
+      const searchBtn = parent.querySelector('.search-btn-nav');
+
+      const performSearch = () => {
+        currentSearch = input.value;
         if (productsContainer) {
           renderProducts();
         } else {
-          // If on home page and typing search, redirect to menu.html with query parameter
-          // For simple implementation without routing, we just save to sessionStorage and redirect
           sessionStorage.setItem('pendingSearch', currentSearch);
           window.location.href = 'menu.html';
         }
+      };
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
       });
+
+      if (searchBtn) {
+        searchBtn.addEventListener('click', performSearch);
+      }
     });
   }
 
