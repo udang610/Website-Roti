@@ -137,8 +137,57 @@ if (productsContainer || document.querySelector('.search-input-nav')) {
       const searchBtn = parent.querySelector('.search-btn-nav');
 
       const performSearch = () => {
-        currentSearch = input.value;
-        if (productsContainer) {
+        const query = input.value.trim().toLowerCase();
+        currentSearch = query;
+
+        // Mapping kategori ke file HTML
+        const categoryMap = {
+          'roti': 'roti.html',
+          'kue': 'kue.html',
+          'makanan': 'makanan.html',
+          'minuman': 'minuman.html',
+          'cookies': 'cookies.html',
+          'cookie': 'cookies.html'
+        };
+
+        // 1. Jika query adalah nama kategori (exact match), langsung pindah
+        if (categoryMap[query]) {
+          window.location.href = categoryMap[query];
+          return;
+        }
+
+        // 2. Cek apakah hasil pencarian semuanya berasal dari satu kategori yang sama
+        const matchingProducts = products.filter(p =>
+          p.name.toLowerCase().includes(query) ||
+          p.description.toLowerCase().includes(query)
+        );
+
+        if (matchingProducts.length > 0) {
+          const firstCat = matchingProducts[0].category;
+          const isAllSameCategory = matchingProducts.every(p => p.category === firstCat);
+
+          if (isAllSameCategory) {
+            const catPageMap = {
+              'Roti': 'roti.html',
+              'Kue': 'kue.html',
+              'Makanan': 'makanan.html',
+              'Minuman': 'minuman.html',
+              'Cookies': 'cookies.html'
+            };
+
+            const targetPage = catPageMap[firstCat];
+            // Jika kita belum di halaman tersebut, pindah ke sana
+            if (targetPage && currentCategory !== firstCat) {
+              sessionStorage.setItem('pendingSearch', currentSearch);
+              window.location.href = targetPage;
+              return;
+            }
+          }
+        }
+
+        // Jika sedang di halaman 'Semua Menu', langsung render filter.
+        // Jika di halaman kategori spesifik (roti, kue, dll), pindah ke menu.html agar hasil pencarian global muncul.
+        if (productsContainer && currentCategory === 'Semua') {
           renderProducts();
         } else {
           sessionStorage.setItem('pendingSearch', currentSearch);
@@ -526,7 +575,7 @@ if (cartItemsPage) {
         console.error(error);
       } finally {
         btnSubmit.textContent = originalText;
-        btnSubmit.disabled = false;
+        btnSubmit.disabled = falsu;
       }
     });
   }
@@ -569,14 +618,14 @@ const fetchOrderHistory = async (phone) => {
             <div>
               <h6 class="fw-bold mb-1">Order #${order.id.toString().slice(-4)}</h6>
               <small class="text-muted">${(() => {
-                let dateStr = order.created_at;
-                if (dateStr) {
-                  // Use slashes and space to force local interpretation (no T)
-                  dateStr = dateStr.replace(/-/g, '/').replace('T', ' ');
-                }
-                const d = new Date(dateStr);
-                return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
-              })()}</small>
+          let dateStr = order.created_at;
+          if (dateStr) {
+            // Use slashes and space to force local interpretation (no T)
+            dateStr = dateStr.replace(/-/g, '/').replace('T', ' ');
+          }
+          const d = new Date(dateStr);
+          return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+        })()}</small>
             </div>
             ${statusBadge}
           </div>
@@ -617,3 +666,45 @@ if (btnTrackOrder) {
 
 // Initial Sync
 updateCartCount();
+
+// --- MENU CAROUSEL INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.querySelector('.menu-swiper')) {
+    const swiper = new Swiper('.menu-swiper', {
+      slidesPerView: 1,
+      spaceBetween: 20,
+      loop: true,
+      autoplay: {
+        delay: 3500,
+        disableOnInteraction: false,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.swiper-button-next-custom',
+        prevEl: '.swiper-button-prev-custom',
+      },
+      breakpoints: {
+        640: {
+          slidesPerView: 2,
+          spaceBetween: 20,
+        },
+        768: {
+          slidesPerView: 2,
+          spaceBetween: 30,
+        },
+        1024: {
+          slidesPerView: 3,
+          spaceBetween: 30,
+        },
+      },
+      on: {
+        init: function () {
+          // You could add logic here if needed
+        }
+      }
+    });
+  }
+});

@@ -10,6 +10,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 </head>
 
 <body>
@@ -130,6 +132,126 @@
       </div>
     </div>
   </section>
+  
+  <!-- Menu Carousel Section -->
+  <section class="py-5 overflow-hidden">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+          <h2 class="fw-bold mb-2">Menu Terpopuler</h2>
+          <p class="text-muted mb-0">Pilihan favorit para pelanggan setia kami</p>
+        </div>
+        <div class="d-none d-md-flex gap-2">
+          <div class="swiper-button-prev-custom">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+            </svg>
+          </div>
+          <div class="swiper-button-next-custom">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Swiper -->
+      <div class="swiper menu-swiper">
+        <div class="swiper-wrapper">
+          <!-- Slide 1 -->
+          <div class="swiper-slide">
+            <div class="menu-carousel-card">
+              <div class="menu-carousel-img">
+                <img src="assets/bread_carousel.png" alt="Roti Gandum">
+                <div class="menu-carousel-badge">Best Seller</div>
+              </div>
+              <div class="menu-carousel-content">
+                <span class="category text-primary-custom fw-bold">Roti</span>
+                <h4 class="fw-bold mt-1">Roti Gandum Premium</h4>
+                <p class="text-muted small">Roti sehat dengan serat tinggi dan tekstur lembut.</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <span class="price fw-bold text-dark">Rp 25.000</span>
+                  <a href="roti.html" class="btn btn-sm btn-primary-custom rounded-pill px-3">Detail</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Slide 2 -->
+          <div class="swiper-slide">
+            <div class="menu-carousel-card">
+              <div class="menu-carousel-img">
+                <img src="assets/cake_carousel.png" alt="Chocolate Cake">
+                <div class="menu-carousel-badge">Premium</div>
+              </div>
+              <div class="menu-carousel-content">
+                <span class="category text-primary-custom fw-bold">Kue</span>
+                <h4 class="fw-bold mt-1">Chocolate Fudge Cake</h4>
+                <p class="text-muted small">Kue cokelat lumer dengan lapisan ganache premium.</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <span class="price fw-bold text-dark">Rp 45.000</span>
+                  <a href="kue.html" class="btn btn-sm btn-primary-custom rounded-pill px-3">Detail</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Slide 3 -->
+          <div class="swiper-slide">
+            <div class="menu-carousel-card">
+              <div class="menu-carousel-img">
+                <img src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=600&q=80" alt="Croissant">
+                <div class="menu-carousel-badge">Hot Item</div>
+              </div>
+              <div class="menu-carousel-content">
+                <span class="category text-primary-custom fw-bold">Pastry</span>
+                <h4 class="fw-bold mt-1">Butter Croissant</h4>
+                <p class="text-muted small">Croissant renyah dengan lapisan mentega Prancis.</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <span class="price fw-bold text-dark">Rp 18.000</span>
+                  <a href="roti.html" class="btn btn-sm btn-primary-custom rounded-pill px-3">Detail</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Slide 4 -->
+          <div class="swiper-slide">
+            <div class="menu-carousel-card">
+              <div class="menu-carousel-img">
+                <img src="https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?auto=format&fit=crop&w=600&q=80" alt="Strawberry Donut">
+              </div>
+              <div class="menu-carousel-content">
+                <span class="category text-primary-custom fw-bold">Donat</span>
+                <h4 class="fw-bold mt-1">Strawberry Glaze Donut</h4>
+                <p class="text-muted small">Donat empuk dengan selai stroberi segar.</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <span class="price fw-bold text-dark">Rp 12.000</span>
+                  <a href="kue.html" class="btn btn-sm btn-primary-custom rounded-pill px-3">Detail</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Slide 5 -->
+          <div class="swiper-slide">
+            <div class="menu-carousel-card">
+              <div class="menu-carousel-img">
+                <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80" alt="Iced Coffee">
+              </div>
+              <div class="menu-carousel-content">
+                <span class="category text-primary-custom fw-bold">Minuman</span>
+                <h4 class="fw-bold mt-1">Iced Caramel Latte</h4>
+                <p class="text-muted small">Kopi espresso premium dengan sirup karamel.</p>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                  <span class="price fw-bold text-dark">Rp 30.000</span>
+                  <a href="minuman.html" class="btn btn-sm btn-primary-custom rounded-pill px-3">Detail</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Pagination -->
+        <div class="swiper-pagination mt-5 position-relative"></div>
+      </div>
+    </div>
+  </section>
 
   <!-- Featured Highlights -->
   <section class="py-5">
@@ -224,6 +346,8 @@
 
   <!-- Bootstrap 5 JS Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/db.js"></script>
   <script src="js/script.js"></script>
